@@ -1,0 +1,14 @@
+{
+    "name": "wassafr/push-server-bundle",
+    "type": "symfony-bundle",
+    "description": "Wassa Push Server bundle",
+    "keywords": ["apns", "gcm", "push", "notification"],
+    "license": "proprietary",
+    "require": {
+        "php": ">=5.4",
+        "wassafr/push-server": "^1.0"
+    },
+    "autoload": {
+        "psr-4": { "Wassa\\MPSBundle\\": "Wassa/MPSBundle/" }
+    }
+}

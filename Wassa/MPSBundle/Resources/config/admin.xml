@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <service id="sonata.admin.platform" class="Wassa\MPSBundle\Admin\PlatformAdmin">
+            <tag name="sonata.admin" manager_type="orm" group="Push" label="Plateformes"/>
+            <argument />
+            <argument>Wassa\MPSBundle\Entity\Platform</argument>
+            <argument />
+            <call method="setTranslationDomain">
+                <argument>WassaMPSBundle</argument>
+            </call>
+        </service>
+    </services>
+</container>

@@ -1,0 +1,34 @@
+<!-- src/Acme/HelloBundle/Resources/config/services.xml -->
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="wassa_mps.class">Wassa\MPSBundle\MPS</parameter>
+        <parameter key="wassa_mps.gcm.api_key" />
+        <parameter key="wassa_mps.gcm.dry_run" />
+        <parameter key="wassa_mps.apns.environment" />
+        <parameter key="wassa_mps.apns.prod_cert" />
+        <parameter key="wassa_mps.apns.sand_cert" />
+        <parameter key="wassa_mps.apns.ca_cert" />
+        <parameter key="wassa_mps.entity_manager" />
+    </parameters>
+
+    <services>
+        <service id="wassa_mps.entity_manager" factory-service="doctrine" factory-method="getEntityManager" class="Doctrine\ORM\EntityManager" public="false">
+            <argument>%wassa_mps.entity_manager%</argument>
+            <argument type="service" id="logger" />
+        </service>
+
+        <service id="wassa_mps" class="%wassa_mps.class%">
+            <argument>%wassa_mps.gcm.api_key%</argument>
+            <argument>%wassa_mps.gcm.dry_run%</argument>
+            <argument>%wassa_mps.apns.environment%</argument>
+            <argument>%wassa_mps.apns.prod_cert%</argument>
+            <argument>%wassa_mps.apns.sand_cert%</argument>
+            <argument>%wassa_mps.apns.ca_cert%</argument>
+            <argument type="service" id="doctrine" />
+            <argument type="service" id="logger" />
+        </service>
+    </services>
+</container>
