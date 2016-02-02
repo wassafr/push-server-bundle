@@ -62,12 +62,10 @@ class ApiController extends Controller
         }
 
         $em = $this->getDoctrine()->getManager();
-        $dql = "SELECT d FROM WassaMPSBundle:Device d WHERE d.registrationToken = :registrationToken AND d INSTANCE OF :class";
+        $dql = "SELECT d FROM $class d WHERE d.registrationToken = :registrationToken";
         $query = $em->createQuery($dql);
-        $query->setParameters([
-            'registrationToken' => $data->registrationToken,
-            'class' => $class
-        ]);
+        $query->setParameter('registrationToken', $data->registrationToken);
+        $query->setMaxResults(1);
         $device = $query->getOneOrNullResult();
 
         if (!$device) {

@@ -6,7 +6,8 @@
     "license": "proprietary",
     "require": {
         "php": "~5.4|~7.0",
-        "wassafr/push-server": "^1.0"
+        "wassafr/push-server": "^1.0",
+        "nelmio/api-doc-bundle": "dev-master"
     },
     "autoload": {
         "psr-4": { "Wassa\\MPSBundle\\": "Wassa/MPSBundle/" }
