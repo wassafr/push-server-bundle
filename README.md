@@ -8,6 +8,7 @@ Installation
 Require the `wassafr/push-server-bundle` package in your composer.json and update
 your dependencies.
 
+    $ composer require duccio/apns-php --no-update
     $ composer require wassafr/push-server-bundle
 
 Register the bundle in `app/AppKernel.php`:
