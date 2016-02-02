@@ -69,7 +69,7 @@ abstract class Device
      * Set device registration token
      *
      * @param $registrationToken
-     * @return Deive
+     * @return Device
      */
     public function setRegistrationToken($registrationToken)
     {
