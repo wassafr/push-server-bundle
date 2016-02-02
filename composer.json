@@ -10,5 +10,10 @@
     },
     "autoload": {
         "psr-4": { "Wassa\\MPSBundle\\": "Wassa/MPSBundle/" }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.1"
+        }
     }
 }
