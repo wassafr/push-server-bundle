@@ -18,12 +18,23 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Wassa\MPSBundle\Events\Events;
 use Wassa\MPSBundle\Events\RegistrationEvent;
+use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 
 class ApiController extends Controller
 {
     /**
      * @Route("/register")
      * @Method("POST")
+     * @ApiDoc(
+     *  resource=true,
+     *  description="Register a new or existing device",
+     *  input="Wassa\MPSBundle\API\RegistrationParameters",
+     *  parameters={
+     *      {"name"="registrationToken", "dataType"="string", "required"=true, "description"="iOS device token or Android registration ID"},
+     *      {"name"="platform", "dataType"="string", "required"=true, "description"="'ios' or 'android'"},
+     *      {"name"="customData", "dataType"="json", "required"=false, "description"="Any custom data in JSON format"}
+     *  }
+     * )
      */
     public function register(Request $request)
     {
@@ -79,7 +90,7 @@ class ApiController extends Controller
             $device->setRegistrationToken($data->registrationToken);
         }
 
-        $customData = isset($data->customData) ? $data->customData : null;
+        $customData = isset($data->customData) ? ( is_string($data->customData) ? json_decode($data->customData) : $data->customData) : null;
         $device->setLastRegistration(new \DateTime());
         $device->setCustomData($customData);
 

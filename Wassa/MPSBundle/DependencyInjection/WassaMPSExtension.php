@@ -4,15 +4,17 @@ namespace Wassa\MPSBundle\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * This is the class that loads and manages your bundle configuration
  *
  * To learn more see {@link http://symfony.com/doc/current/cookbook/bundles/extension.html}
  */
-class WassaMPSExtension extends Extension
+class WassaMPSExtension extends Extension implements PrependExtensionInterface
 {
     /**
      * {@inheritDoc}
@@ -32,5 +34,18 @@ class WassaMPSExtension extends Extension
         $container->setParameter("wassa_mps.apns.sand_cert", $config['apns']["sand_cert"]);
         $container->setParameter("wassa_mps.apns.ca_cert", $config['apns']["ca_cert"]);
         $container->setParameter("wassa_mps.entity_manager", $config['entity_manager']);
+    }
+
+    public function prepend(ContainerBuilder $container)
+    {
+        $bundles = $container->getParameter('kernel.bundles');
+        $configValues = Yaml::parse(file_get_contents(dirname(__FILE__).'/../Resources/config/config.yml'));
+
+        if (isset($bundles['NelmioApiDocBundle'])) {
+            $container->prependExtensionConfig(
+                'nelmio_api_doc',
+                $configValues['nelmio_api_doc']
+            );
+        }
     }
 }

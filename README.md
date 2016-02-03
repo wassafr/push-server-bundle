@@ -102,4 +102,10 @@ The registration service should be called in POST with the following POST data:
     "platform": "<ios|android>",
     "customData": <CUSTOM_JSON_DATA>
 }
+
 ```
+Events
+------
+The bundle fire the following events:
+* `wassa_mps.registration.pre_check`: right after the registration API is called but before the device is registered
+* `wassa_mps.registration.post_check`: right after the device has been registered

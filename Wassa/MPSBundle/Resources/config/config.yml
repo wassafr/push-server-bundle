@@ -1,0 +1,11 @@
+nelmio_api_doc:
+    sandbox:
+        authentication:
+            delivery: header
+            name: apikey
+        request_format:
+            formats:
+                json: application/json
+        body_format:
+            formats: [ json ]
+            default_format: json
