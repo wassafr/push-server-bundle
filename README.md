@@ -99,6 +99,7 @@ The registration service should be called in POST with the following POST data:
 ```json
 {
     "registrationToken": "<GCM_REGISTRATIONID_OR_APNS_DEVICETOKEN>",
-    "platform": "<ios|android>"
+    "platform": "<ios|android>",
+    "customData": <CUSTOM_JSON_DATA>
 }
 ```

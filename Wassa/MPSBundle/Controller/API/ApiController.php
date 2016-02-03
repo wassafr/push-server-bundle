@@ -16,6 +16,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Wassa\MPSBundle\Events\Events;
+use Wassa\MPSBundle\Events\RegistrationEvent;
 
 class ApiController extends Controller
 {
@@ -25,6 +27,10 @@ class ApiController extends Controller
      */
     public function register(Request $request)
     {
+        $dispatcher = $this->get('event_dispatcher');
+        $event = new RegistrationEvent();
+        $dispatcher->dispatch(Events::REGISTRATION_PRECHECK, $event);
+
         $data = json_decode($request->getContent());
 
         if (!$data) {
@@ -73,9 +79,22 @@ class ApiController extends Controller
             $device->setRegistrationToken($data->registrationToken);
         }
 
+        $customData = isset($data->customData) ? $data->customData : null;
         $device->setLastRegistration(new \DateTime());
+        $device->setCustomData($customData);
+
         $em->persist($device);
         $em->flush();
+
+        $event = new RegistrationEvent($data->registrationToken, $data->platform, $customData);
+        $dispatcher->dispatch(Events::REGISTRATION_POSTCHECK, $event);
+
+        if ($event->getResult() && $event->getReason()) {
+            return new JsonResponse([
+                'result' => $event->getResult(),
+                'reason' => $event->getReason()
+            ]);
+        }
 
         return new JsonResponse([
             'result' => 'OK'
