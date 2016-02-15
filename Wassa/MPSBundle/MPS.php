@@ -6,6 +6,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 use Doctrine\ORM\EntityManager;
 
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Wassa\MPS\MultiPushServer;
 use Wassa\MPS\PushData;
 use Wassa\MPSBundle\Entity\AndroidDevice;
@@ -34,6 +35,11 @@ class MPS
     protected $_logger;
 
     /**
+     * @var ContainerInterface
+     */
+    protected $_container;
+
+    /**
      * @var array
      */
     protected $_cache = [];
@@ -45,8 +51,7 @@ class MPS
      * @param string $prod_cert
      * @param string $sand_cert
      * @param string $ca_cert
-     * @param RegistryInterface $registry
-     * @param LoggerInterface $logger
+     * @param ContainerInterface $container
      */
     public function __construct($api_key,
                                 $dry_run,
@@ -54,20 +59,12 @@ class MPS
                                 $prod_cert,
                                 $sand_cert,
                                 $ca_cert,
-                                RegistryInterface $registry,
-                                LoggerInterface $logger)
+                                ContainerInterface $container)
     {
-        $this->_mpsServer = new MultiPushServer(
-            $api_key,
-            $dry_run,
-            $environment,
-            $prod_cert,
-            $sand_cert,
-            $ca_cert,
-            $logger
-        );
-        $this->_registry = $registry;
-        $this->_logger = $logger;
+        $this->_container = $container;
+        $this->_registry = $container->get('doctrine');
+        $this->_logger = $container->get('logger');
+        $this->_mpsServer = new MultiPushServer($api_key, $dry_run, $environment, $prod_cert, $sand_cert, $ca_cert,$this->_logger);
     }
 
     /**
@@ -139,10 +136,18 @@ class MPS
 
         if (array_key_exists('gcm', $sortedDevices)) {
             $result['gcm'] = $this->sendMultipleGCM($pushData, $sortedDevices['gcm']);
+
+            if ($this->_container->getParameter('wassa_mps.delete_failed')) {
+                $this->deleteFailed($result['gcm']['error']);
+            }
         }
 
         if (array_key_exists('apns', $sortedDevices)) {
             $result['apns'] = $this->sendMultipleAPNS($pushData, $sortedDevices['apns']);
+
+            if ($this->_container->getParameter('wassa_mps.delete_failed')) {
+                $this->deleteFailed($result['apns']['error']);
+            }
         }
 
         return $result;
@@ -155,7 +160,12 @@ class MPS
      */
     protected function sendMultipleGCM(PushData $pushData, $devices)
     {
-        $registrationIds = $this->registrationTokensOfDevices($devices);
+        $registrationIds = [];
+
+        foreach ($devices as $device) {
+            $registrationIds[] = $device->getRegistrationToken();
+        }
+
         $this->_mpsServer->setMode(MultiPushServer::SEND_GCM);
 
         return $this->_mpsServer->send($pushData, $registrationIds);
@@ -168,22 +178,22 @@ class MPS
      */
     protected function sendMultipleAPNS(PushData $pushData, $devices)
     {
-        $deviceTokens = $this->registrationTokensOfDevices($devices);
-        $this->_mpsServer->setMode(MultiPushServer::SEND_APNS);
-        $result = $this->_mpsServer->send($pushData, $deviceTokens);
+        $em = $this->getEntityManager();
+        $badges = [];
+        $deviceTokens = [];
 
-        // Increment badge count for successful devices
-        if ($result['success']) {
-            $em = $this->getEntityManager();
-            $successDevices = $em->getRepository('WassaMPSBundle:IOSDevice')->findBy(['registrationToken' => $result['success']]);
-
-            foreach ($successDevices as $successDevice) {
-                $successDevice->setBadge($successDevice->getBadge() + $pushData->getApnsBadge());
-                $em->persist($successDevice);
-            }
-
-            $em->flush();
+        foreach ($devices as $device) {
+            $device->increaseBadge();
+            $badges[] = $device->getBadge() ? $device->getBadge() : 0;
+            $deviceTokens[] = $device->getRegistrationToken();
+            $em->persist($device);
         }
+
+        $em->flush();
+
+        // Increment badge count devices
+        $this->_mpsServer->setMode(MultiPushServer::SEND_APNS);
+        $result = $this->_mpsServer->send($pushData, $deviceTokens, $badges);
 
         return $result;
     }
@@ -211,16 +221,11 @@ class MPS
     }
 
     /**
-     * @param mixed $devices
-     * @return array
+     * @param mixed $tokens
      */
-    protected function  registrationTokensOfDevices($devices) {
-        $registrationTokens = [];
-
-        foreach ($devices as $device) {
-            $registrationTokens[] = $device->getRegistrationToken();
-        }
-
-        return $registrationTokens;
+    protected function deleteFailed($tokens)
+    {
+        $dql = "DELETE FROM WassaMPSBundle:Device d WHERE d.registrationToken IN('" . implode("', '", $tokens) . "')";
+        $this->_registry->getManager()->createQuery($dql)->execute();
     }
 } 

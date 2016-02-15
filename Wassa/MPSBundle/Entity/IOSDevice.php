@@ -40,4 +40,14 @@ class IOSDevice extends Device
     {
         return $this->badge;
     }
+
+    public function increaseBadge($count = 1)
+    {
+        $this->badge += $count;
+    }
+
+    public function decreaseBadge($count = 1)
+    {
+        $this->increaseBadge($count * -1);
+    }
 }

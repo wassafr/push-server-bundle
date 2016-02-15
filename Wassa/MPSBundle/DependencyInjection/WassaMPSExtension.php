@@ -34,6 +34,7 @@ class WassaMPSExtension extends Extension implements PrependExtensionInterface
         $container->setParameter("wassa_mps.apns.sand_cert", $config['apns']["sand_cert"]);
         $container->setParameter("wassa_mps.apns.ca_cert", $config['apns']["ca_cert"]);
         $container->setParameter("wassa_mps.entity_manager", $config['entity_manager']);
+        $container->setParameter("wassa_mps.delete_failed", $config['delete_failed']);
     }
 
     public function prepend(ContainerBuilder $container)

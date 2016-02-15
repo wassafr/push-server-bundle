@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Wassa\MPSBundle\Events\Events;
 use Wassa\MPSBundle\Events\RegistrationEvent;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
@@ -28,7 +29,6 @@ class ApiController extends Controller
      * @ApiDoc(
      *  resource=true,
      *  description="Register a new or existing device",
-     *  input="Wassa\MPSBundle\API\RegistrationParameters",
      *  parameters={
      *      {"name"="registrationToken", "dataType"="string", "required"=true, "description"="iOS device token or Android registration ID"},
      *      {"name"="platform", "dataType"="string", "required"=true, "description"="'ios' or 'android'"},
@@ -106,6 +106,43 @@ class ApiController extends Controller
                 'reason' => $event->getReason()
             ]);
         }
+
+        return new JsonResponse([
+            'result' => 'OK'
+        ]);
+    }
+
+    /**
+     * @Route("/badge/decrease")
+     * @Method("PUT")
+     * @ApiDoc(
+     *  resource=true,
+     *  description="Decrease the badge number",
+     *  parameters={
+     *      {"name"="deviceToken", "dataType"="string", "required"=true, "description"="iOS device token"},
+     *      {"name"="count", "dataType"="integer", "required"=false, "description"="Number to decrease. If not specified, badge will be set to 0"}
+     *  }
+     * )
+     */
+    public function badge(Request $request)
+    {
+        $em = $this->get('doctrine')->getManager();
+        $data = json_decode($request->getContent());
+        $device = $em->getRepository('WassaMPSBundle:IOSDevice')->findOneByRegistrationToken($data->deviceToken);
+
+        if (!$device) {
+            throw new NotFoundHttpException('Unexisting device');
+        }
+
+        if (isset($data->count)) {
+            $device->decreaseBadge($data->count);
+        }
+        else {
+            $device->setBadge(0);
+        }
+
+        $em->persist($device);
+        $em->flush();
 
         return new JsonResponse([
             'result' => 'OK'

@@ -22,6 +22,10 @@ class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
+                ->booleanNode('delete_failed')
+                    ->info('Delete tokens with errors')
+                    ->defaultFalse()
+                ->end()
                 ->arrayNode('gcm')
                     ->children()
                         ->scalarNode('api_key')
