@@ -27,7 +27,7 @@ class ApiController extends Controller
      * @Route("/register")
      * @Method("POST")
      * @ApiDoc(
-     *  resource=true,
+     *  resource="/api/push/",
      *  description="Register a new or existing device",
      *  parameters={
      *      {"name"="registrationToken", "dataType"="string", "required"=true, "description"="iOS device token or Android registration ID"},
@@ -116,7 +116,7 @@ class ApiController extends Controller
      * @Route("/badge/decrease")
      * @Method("PUT")
      * @ApiDoc(
-     *  resource=true,
+     *  resource="/api/push/",
      *  description="Decrease the badge number",
      *  parameters={
      *      {"name"="deviceToken", "dataType"="string", "required"=true, "description"="iOS device token"},
