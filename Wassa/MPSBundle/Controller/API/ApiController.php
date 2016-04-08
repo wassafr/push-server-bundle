@@ -67,11 +67,9 @@ class ApiController extends Controller
 
         if ($data->platform == 'ios') {
             $class = '\Wassa\MPSBundle\Entity\IOSDevice';
-        }
-        elseif ($data->platform == 'android') {
+        } elseif ($data->platform == 'android') {
             $class = '\Wassa\MPSBundle\Entity\AndroidDevice';
-        }
-        else {
+        } else {
             return new JsonResponse([
                 'result' => 'KO',
                 'reason' => 'UNSUPPORTED_PLATFORM'
@@ -90,7 +88,7 @@ class ApiController extends Controller
             $device->setRegistrationToken($data->registrationToken);
         }
 
-        $customData = isset($data->customData) ? ( is_string($data->customData) ? json_decode($data->customData) : $data->customData) : null;
+        $customData = isset($data->customData) ? (is_string($data->customData) ? json_decode($data->customData) : $data->customData) : null;
         $device->setLastRegistration(new \DateTime());
         $device->setCustomData($customData);
 
@@ -136,10 +134,51 @@ class ApiController extends Controller
 
         if (isset($data->count)) {
             $device->decreaseBadge($data->count);
-        }
-        else {
+        } else {
             $device->setBadge(0);
         }
+
+        $em->persist($device);
+        $em->flush();
+
+        return new JsonResponse([
+            'result' => 'OK'
+        ]);
+    }
+
+    /**
+     * @Route("/custom-data")
+     * @Method("PUT")
+     * @ApiDoc(
+     *  resource="/api/push/",
+     *  description="Update custom data",
+     *  parameters={
+     *      {"name"="deviceToken", "dataType"="string", "required"=true, "description"="iOS device token"},
+     *      {"name"="key", "dataType"="string", "required"=false, "description"="Custom data key"},
+     *      {"name"="value", "dataType"="mixed", "required"=false, "description"="Custom data value for key"}
+     *  }
+     * )
+     */
+    public function setCustomData(Request $request)
+    {
+        $deviceToken = $request->request->get('deviceToken');
+        $em = $this->getDoctrine()->getManager();
+        $device = $em->getRepository('WassaMPSBundle:IOSDevice')->findOneByRegistrationToken($deviceToken);
+
+        if (!$device) {
+            throw new NotFoundHttpException('Unexisting device');
+        }
+
+        $key = $request->request->get('key');
+        $value = $request->request->get('value');
+
+        $customData = $device->getCustomData();
+        if (!is_null($value)) {
+            $customData[$key] = $value;
+        } else {
+            unset($customData[$key]);
+        }
+        $device->setCustomData($customData);
 
         $em->persist($device);
         $em->flush();

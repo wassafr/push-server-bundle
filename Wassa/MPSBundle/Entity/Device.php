@@ -28,7 +28,7 @@ abstract class Device
      *
      * @ORM\Column(name="registration_token", type="string", nullable=true)
      */
-    private $registrationToken;
+    protected $registrationToken;
 
     /**
      * @var \DateTime
@@ -42,13 +42,13 @@ abstract class Device
      *
      * @ORM\Column(name="custom_data", type="json_array", nullable=true)
      */
-    private $customData;
+    protected $customData;
 
 
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -94,7 +94,7 @@ abstract class Device
     /**
      * Get lastRegistration
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getLastRegistration()
     {
