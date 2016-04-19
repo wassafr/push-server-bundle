@@ -12,7 +12,7 @@ class DeviceRepository extends EntityRepository
         $query = $this->_em->createQuery($dql);
         $query->setParameter('registrationToken', $registrationToken);
 
-        return $query->getSingleResult();
+        return $query->getOneOrNullResult();
     }
 
     public function findByCustomData($customData)
