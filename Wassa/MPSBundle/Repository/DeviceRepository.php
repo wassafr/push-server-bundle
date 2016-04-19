@@ -6,7 +6,7 @@ use Doctrine\ORM\EntityRepository;
 
 class DeviceRepository extends EntityRepository
 {
-    public function findOnByRegistrationToken($registrationToken)
+    public function findOneByRegistrationToken($registrationToken)
     {
         $dql = "SELECT d from WassaMPSBundle:Device d WHERE d.registrationToken = ':registrationToken'";
         $query = $this->_em->createQuery($dql);

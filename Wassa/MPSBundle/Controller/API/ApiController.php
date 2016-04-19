@@ -111,6 +111,35 @@ class ApiController extends Controller
     }
 
     /**
+     * @Route("/unregister")
+     * @Method("POST")
+     * @ApiDoc(
+     *  resource="/api/push/",
+     *  description="Unregister a device",
+     *  parameters={
+     *      {"name"="deviceToken", "dataType"="string", "required"=true, "description"="iOS device token or Android registration ID"},
+     *  }
+     * )
+     */
+    public function unregister(Request $request)
+    {
+        $deviceToken = $request->request->get('deviceToken');
+        $em = $this->getDoctrine()->getManager();
+        $device = $em->getRepository('WassaMPSBundle:Device')->findOneByRegistrationToken($deviceToken);
+
+        if (!$device) {
+            throw new NotFoundHttpException('Unexisting device');
+        }
+
+        $em->remove($device);
+        $em->flush();
+
+        return new JsonResponse([
+            'result' => 'OK'
+        ]);
+    }
+
+    /**
      * @Route("/badge/decrease")
      * @Method("PUT")
      * @ApiDoc(
@@ -163,7 +192,7 @@ class ApiController extends Controller
     {
         $deviceToken = $request->request->get('deviceToken');
         $em = $this->getDoctrine()->getManager();
-        $device = $em->getRepository('WassaMPSBundle:IOSDevice')->findOneByRegistrationToken($deviceToken);
+        $device = $em->getRepository('WassaMPSBundle:Device')->findOneByRegistrationToken($deviceToken);
 
         if (!$device) {
             throw new NotFoundHttpException('Unexisting device');
