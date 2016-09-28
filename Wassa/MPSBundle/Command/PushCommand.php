@@ -11,6 +11,8 @@ use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Wassa\MPS\PushData;
+use Wassa\MPSBundle\Entity\AndroidDevice;
+use Wassa\MPSBundle\Entity\IOSDevice;
 
 class PushCommand extends ContainerAwareCommand
 {
@@ -46,6 +48,7 @@ class PushCommand extends ContainerAwareCommand
             $token = $helper->ask($input, $output, $tokenQuestion);
 
             $pushData = new PushData();
+            $device = null;
             switch ($response) {
                 case 'ios':
                     $pushData->setApnsCategory("debug");
@@ -54,6 +57,9 @@ class PushCommand extends ContainerAwareCommand
                     $pushData->setApnsCustomProperties($customProperty);
                     $pushData->setApnsSound("default");
                     $pushData->setApnsText($body);
+
+                    $device = new IOSDevice();
+                    $device->setRegistrationToken($token);
                     break;
                 case 'android':
                     $payload = array(
@@ -65,6 +71,9 @@ class PushCommand extends ContainerAwareCommand
                         'data' => $customProperty,
                     );
                     $pushData->setGcmPayloadData($payload);
+
+                    $device = new AndroidDevice();
+                    $device->setRegistrationToken($token);
                     break;
             }
 
@@ -72,12 +81,14 @@ class PushCommand extends ContainerAwareCommand
             $output->writeln("");
             $sendQuestion = new ConfirmationQuestion("Sending a push message to $token, confirm push submission (y/n) ? ", true);
             if ($helper->ask($input, $output, $sendQuestion)) {
-                $this->getContainer()->get('wassa_mps')->sendToMultipleDevices($pushData, array($token));
-                $output->writeln("Push send to " . $token);
+                $this->getContainer()->get('wassa_mps')->sendToMultipleDevices($pushData, array($device));
+                $output->writeln("-> Push sent to " . $token);
+            } else {
+                $output->writeln("-> Push was not sent");
             }
 
             // Ask for another token
-            $continueQuestion = new ConfirmationQuestion('Do you want to send another push (y/n) ? ', true);
+            $continueQuestion = new ConfirmationQuestion('Do you wish to send another push (y/n) ? ', true);
         } while ($helper->ask($input, $output, $continueQuestion));
 
     }
