@@ -27,7 +27,7 @@ class ApiController extends Controller
      * @Route("/register")
      * @Method("POST")
      * @ApiDoc(
-     *  resource="/api/push/",
+     *  resource="Push Notifications",
      *  description="Register a new or existing device",
      *  parameters={
      *      {"name"="registrationToken", "dataType"="string", "required"=true, "description"="iOS device token or Android registration ID"},
@@ -114,7 +114,7 @@ class ApiController extends Controller
      * @Route("/unregister")
      * @Method("POST")
      * @ApiDoc(
-     *  resource="/api/push/",
+     *  resource="Push Notifications",
      *  description="Unregister a device",
      *  parameters={
      *      {"name"="deviceToken", "dataType"="string", "required"=true, "description"="iOS device token or Android registration ID"},
@@ -143,7 +143,7 @@ class ApiController extends Controller
      * @Route("/badge/decrease")
      * @Method("PUT")
      * @ApiDoc(
-     *  resource="/api/push/",
+     *  resource="Push Notifications",
      *  description="Decrease the badge number",
      *  parameters={
      *      {"name"="deviceToken", "dataType"="string", "required"=true, "description"="iOS device token"},
@@ -179,7 +179,7 @@ class ApiController extends Controller
      * @Route("/custom-data")
      * @Method("PUT")
      * @ApiDoc(
-     *  resource="/api/push/",
+     *  resource="Push Notifications",
      *  description="Update custom data",
      *  parameters={
      *      {"name"="deviceToken", "dataType"="string", "required"=true, "description"="iOS device token"},
