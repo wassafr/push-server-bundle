@@ -15,9 +15,10 @@
     </parameters>
 
     <services>
-        <service id="wassa_mps.entity_manager" factory-service="doctrine" factory-method="getEntityManager" class="Doctrine\ORM\EntityManager" public="false">
+        <service id="wassa_mps.entity_manager" class="Doctrine\ORM\EntityManager" public="false">
             <argument>%wassa_mps.entity_manager%</argument>
             <argument type="service" id="logger" />
+            <factory service="doctrine" method="getEntityManager" />
         </service>
 
         <service id="wassa_mps" class="%wassa_mps.class%">
