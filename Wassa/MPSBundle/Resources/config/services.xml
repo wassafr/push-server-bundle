@@ -21,7 +21,7 @@
             <factory service="doctrine" method="getEntityManager" />
         </service>
 
-        <service id="wassa_mps" class="%wassa_mps.class%">
+        <service id="wassa_mps" class="%wassa_mps.class%" public="true">
             <argument>%wassa_mps.gcm.api_key%</argument>
             <argument>%wassa_mps.gcm.dry_run%</argument>
             <argument>%wassa_mps.apns.environment%</argument>
